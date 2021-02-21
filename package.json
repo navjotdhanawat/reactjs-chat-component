@@ -1,10 +1,10 @@
 {
-  "name": "test",
+  "name": "reactjs-chat-component",
   "version": "1.0.0",
   "description": "Made with create-react-library",
   "author": "navjotdhanawat",
   "license": "MIT",
-  "repository": "navjotdhanawat/test",
+  "repository": "navjotdhanawat/reactjs-chat-component",
   "main": "dist/index.js",
   "module": "dist/index.modern.js",
   "source": "src/index.tsx",
