@@ -6,6 +6,7 @@
     position: fixed;
     width: 360px;
     height: 500px;
+    background: #ffffff;
   }
 .scrollbar-w-2::-webkit-scrollbar {
     width: 0.25rem;

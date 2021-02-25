@@ -3,55 +3,78 @@ import './index.module.css';
 import './styles.module.css'
 import "tailwindcss/tailwind.css"
 
+interface CBFunction {
+  (event: any): void
+}
+
 interface Props {
-  user: string,
+  user: {
+    id: string,
+    online: boolean,
+    name: string,
+    profile: string,
+    connected: boolean
+  },
+  self: {
+    id: string,
+    profile: string
+  },
   messages: {
     displayName: string,
     message: string,
     id: string,
     profile: string,
-    time: string
+    timestamp: string
   }[],
   options?: {
     isAudioRecord?: boolean,
     isCamera?: boolean,
     isAttachment?: boolean,
     isSmiley?: boolean
-  }
+  },
+  onSend: CBFunction
 }
 
-export const ExampleComponent = ({ user, messages = [], options = {} }: Props) => {
+export const ChatX = ({ self ,user, messages = [], options = {}, onSend }: Props) => {
   const { isAudioRecord, isCamera, isAttachment, isSmiley } = options;
-  const messagesEndRef = useRef<null | HTMLDivElement>(null)
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
   const [show, setShow] = useState(false);
-
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     scrollToBottom()
   }, [messages]);
 
+  const handleSend = () => {
+    onSend(message)
+    setMessage("")
+  }
+
+  const handleChange = (value: string) => setMessage(value);
+
   return (
     <div className="chat-component">
       <div id="chat-window" className={`flex-1 justify-between flex flex-col h-screen shadow pb-3 mb-3 transition duration-500 transform ${show ? '' : 'translate-x-60 translate-y-96 scale-0'}`}>
         <div className="flex sm:items-center justify-between p-3 border-b-2 border-gray-200 bg-blue-500">
-          <div className="flex items-center space-x-4">
-            <img src="https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144" alt="" className="w-5 sm:w-10 h-10 sm:h-10 rounded-full" />
+          {user.connected && <div className="flex items-center space-x-4">
+            <img src={user.profile} alt="" className="w-5 sm:w-10 h-10 sm:h-10 rounded-full" />
             <div className="flex flex-col leading-tight">
               <div className="text-xl mt-1 flex items-center">
-                <span className="text-white mr-3">{user}</span>
-                <span className="text-green-500">
+                <span className="text-white mr-3">{user.name}</span>
+                <span className={`${user.online ? 'text-green-500' : 'text-grey-50'}`}>
                   <svg width="10" height="10">
                     <circle cx="5" cy="5" r="5" fill="currentColor"></circle>
                   </svg>
                 </span>
               </div>
             </div>
-          </div>
-          <div className="flex items-center space-x-2">
+          </div>}
+          <div className="flex items-center space-x-2 float-right">
             <button onClick={() => { }} type="button" className="inline-flex items-center justify-center rounded-full h-6 w-6 transition duration-500 ease-in-out text-white hover:bg-gray-300 focus:outline-none">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clipRule="evenodd" />
@@ -66,26 +89,19 @@ export const ExampleComponent = ({ user, messages = [], options = {} }: Props) =
         </div>
         <div id="messages" className="flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
           {
-            messages.map((data) => {
-              if (data.displayName === 'Navjot') {
-                return (
-                  <div className="chat-message" key={data.id}>
-                    <div className="flex items-end justify-end">
-                      <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end">
-                        <div><span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white ">{data.message}</span></div>
-                      </div>
-                      <img src="https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144" alt="My profile" className="w-6 h-6 rounded-full order-2" />
-                    </div>
-                  </div>
-                )
-              }
+            messages.map((data: any) => {
+              let selfUser = self.id === data.from
               return (
                 <div className="chat-message" key={data.id}>
-                  <div className="flex items-end">
-                    <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
-                      <div><span className="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">{data.message}</span></div>
+                  <div className={`flex items-end ${selfUser && 'justify-end'}`}>
+                    <div className={`flex flex-col space-y-2 text-xs max-w-xs mx-2 ${selfUser ? 'order-1 items-end' : 'order-2 items-start'}`}>
+                      <div>
+                        <span className={`px-4 py-2 rounded-lg inline-block ${selfUser ? "rounded-br-none bg-blue-600 text-white" : "rounded-bl-none bg-gray-300 text-gray-600"}`}>
+                          {data.message}
+                        </span>
+                      </div>
                     </div>
-                    <img src="https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144" alt="My profile" className="w-6 h-6 rounded-full order-1" />
+                    <img src={data.profile} alt="My profile" className={`w-6 h-6 rounded-full ${selfUser ? "order-2" : "order-1"}`} />
                   </div>
                 </div>
               )
@@ -104,7 +120,7 @@ export const ExampleComponent = ({ user, messages = [], options = {} }: Props) =
                 </button>
               </span>)
             }
-            <input type="text" placeholder="Write Something" className="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-full py-3" />
+            <input disabled={!user.connected} value={message} onKeyDown={(e: any) => { if (e.key === 'Enter') handleSend() }} onChange={(e) => handleChange(e.target.value)} type="text" placeholder="Write Something" className="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-full py-3" />
             <div className="absolute right-0 items-center inset-y-0 hidden sm:flex">
               {isAttachment && (<button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">
@@ -127,7 +143,7 @@ export const ExampleComponent = ({ user, messages = [], options = {} }: Props) =
                   </svg>
                 </button>)
               }
-              <button type="button" className="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
+              <button disabled={!user.connected} onClick={handleSend} type="button" className="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6 transform rotate-90">
                   <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
                 </svg>
@@ -136,7 +152,7 @@ export const ExampleComponent = ({ user, messages = [], options = {} }: Props) =
           </div>
         </div>
       </div>
-      <button onClick={() => setShow(!show)} type="button" className={`chat-btn right-3 p-3 bottom-3 fixed inline-flex items-center justify-center rounded-full h-16 w-16 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none transform ${show ? 'scale-0' : ''}`}>
+      <button onClick={() => setShow(!show)} type="button" className={`z-10 chat-btn right-3 p-3 bottom-3 fixed inline-flex items-center justify-center rounded-full h-16 w-16 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none transform ${show ? 'scale-0' : ''}`}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
           <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
           <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
