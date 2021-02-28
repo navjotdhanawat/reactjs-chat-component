@@ -8,6 +8,7 @@ interface CBFunction {
 }
 
 interface Props {
+  show: boolean,
   user: {
     id: string,
     online: boolean,
@@ -32,10 +33,12 @@ interface Props {
     isAttachment?: boolean,
     isSmiley?: boolean
   },
-  onSend: CBFunction
+  onSend: CBFunction,
+  onHide: CBFunction,
+  onShow: CBFunction
 }
 
-export const ChatX = ({ self ,user, messages = [], options = {}, onSend }: Props) => {
+export const ChatX = ({ show = false,onHide, onShow, self ,user, messages = [], options = {}, onSend }: Props) => {
   const { isAudioRecord, isCamera, isAttachment, isSmiley } = options;
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
@@ -43,7 +46,6 @@ export const ChatX = ({ self ,user, messages = [], options = {}, onSend }: Props
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  const [show, setShow] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -80,7 +82,7 @@ export const ChatX = ({ self ,user, messages = [], options = {}, onSend }: Props
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clipRule="evenodd" />
               </svg>
             </button>
-            <button onClick={() => setShow(!show)} type="button" className="inline-flex items-center justify-center rounded-full h-6 w-6 transition duration-500 ease-in-out text-white hover:bg-gray-300 focus:outline-none">
+            <button onClick={(e) => onHide(e)} type="button" className="inline-flex items-center justify-center rounded-full h-6 w-6 transition duration-500 ease-in-out text-white hover:bg-gray-300 focus:outline-none">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
@@ -152,7 +154,7 @@ export const ChatX = ({ self ,user, messages = [], options = {}, onSend }: Props
           </div>
         </div>
       </div>
-      <button onClick={() => setShow(!show)} type="button" className={`z-10 chat-btn right-3 p-3 bottom-3 fixed inline-flex items-center justify-center rounded-full h-16 w-16 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none transform ${show ? 'scale-0' : ''}`}>
+      <button onClick={(e) => onShow(e)} type="button" className={`z-10 chat-btn right-3 p-3 bottom-3 fixed inline-flex items-center justify-center rounded-full h-16 w-16 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none transform ${show ? 'scale-0' : ''}`}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
           <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
           <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
