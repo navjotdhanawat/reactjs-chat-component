@@ -1,6 +1,6 @@
 {
   "name": "reactjs-chat-component",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Made with create-react-library",
   "author": "navjotdhanawat",
   "license": "MIT",
@@ -59,14 +59,11 @@
     "react-dom": "^16.13.1",
     "react-scripts": "^3.4.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.3",
-    "typescript": "^3.7.5"
+    "typescript": "^3.7.5",
+    "watch": "^1.0.2"
   },
   "files": [
     "dist"
   ],
-  "dependencies": {
-    "postcss-cli": "^8.3.1",
-    "postcss-import": "^14.0.0",
-    "watch": "^1.0.2"
-  }
+  "dependencies": {}
 }
