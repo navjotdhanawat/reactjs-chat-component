@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { ChatX } from 'test';
 
+const RANDOM_TEXT = [
+  "Lorem Ipsum is simply dummy text of the printing",
+  "Ipsum passages, and more recently with desktop"
+]
+
 const App = () => {
   const [show, setShow] = useState<any>([]);
 
@@ -36,21 +41,25 @@ const App = () => {
     }
     setMessages([...messages, data]);
   }
-  
-  useEffect(() => {
+
+  const getRandomMessage = () => {
     let flag = Math.round(Math.random())
-    let data = {
+    return {
       id: new Date().getTime().toString(),
       from: flag ? recepient.id : user.id,
       to: flag ? user.id : recepient.id,
-      message: Math.random(),
+      message: RANDOM_TEXT[Math.round(Math.random())],
       displayName: recepient.displayName,
       profile: flag ? recepient.profile : user.profile,
       timestamp: "13:35"
     }
+  }
+  
+  useEffect(() => {
     
     let interval = setInterval(() => {
-      setMessages([...messages, data]);
+      let message = getRandomMessage()
+      setMessages([...messages, message]);
     }, 1000);
 
     return () => {
