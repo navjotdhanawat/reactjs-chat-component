@@ -1,13 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react'
-import './index.module.css';
-import './styles.module.css'
-import "tailwindcss/tailwind.css"
-
-interface CBFunction {
+interface ICBFunction {
   (event: any): void
 }
 
 interface Props {
+  style: object,
+  isTyping: boolean,
   show: boolean,
   user: {
     id: string,
@@ -16,7 +14,7 @@ interface Props {
     profile: string,
     connected: boolean
   },
-  self: {
+  recepient: {
     id: string,
     profile: string
   },
@@ -31,15 +29,36 @@ interface Props {
     isAudioRecord?: boolean,
     isCamera?: boolean,
     isAttachment?: boolean,
-    isSmiley?: boolean
+    isSmiley?: boolean,
+    inputDisabled?: boolean
   },
-  onSend: CBFunction,
-  onHide: CBFunction,
-  onShow: CBFunction
+  onSend: ICBFunction,
+  onHide: ICBFunction,
+  onShow: ICBFunction
 }
 
-export const ChatX = ({ show = false,onHide, onShow, self ,user, messages = [], options = {}, onSend }: Props) => {
-  const { isAudioRecord, isCamera, isAttachment, isSmiley } = options;
+export const ChatX = ({ 
+  isTyping = false, 
+  show = false, 
+  onHide,
+  onShow,
+  recepient,
+  user,
+  messages = [],
+  options = {},
+  onSend,
+  style = {
+    zIndex: '111',
+    bottom: '0',
+    fontSize: '12px',
+    right: '24px',
+    position: 'fixed',
+    width: '360px',
+    height: '500px',
+    background: '#ffffff'
+  }
+}: Props) => {
+  const { isAudioRecord, isCamera, isAttachment, isSmiley, inputDisabled } = options;
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -61,7 +80,7 @@ export const ChatX = ({ show = false,onHide, onShow, self ,user, messages = [], 
 
   return (
     <div className="chat-component">
-      <div id="chat-window" className={`flex-1 justify-between flex flex-col h-screen shadow pb-3 mb-3 transition duration-500 transform ${show ? '' : 'translate-x-60 translate-y-96 scale-0'}`}>
+      <div id="chat-window" style={style} className={`flex-1 justify-between flex flex-col h-screen shadow pb-3 mb-3 transition duration-500 transform ${show ? '' : 'translate-x-60 translate-y-96 scale-0'}`}>
         <div className="flex sm:items-center justify-between p-3 border-b-2 border-gray-200 bg-blue-500">
           {user.connected && <div className="flex items-center space-x-4">
             <img src={user.profile} alt="" className="w-5 sm:w-10 h-10 sm:h-10 rounded-full" />
@@ -92,18 +111,18 @@ export const ChatX = ({ show = false,onHide, onShow, self ,user, messages = [], 
         <div id="messages" className="flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
           {
             messages.map((data: any) => {
-              let selfUser = self.id === data.from
+              let recepientUser = recepient.id !== data.from
               return (
                 <div className="chat-message" key={data.id}>
-                  <div className={`flex items-end ${selfUser && 'justify-end'}`}>
-                    <div className={`flex flex-col space-y-2 text-xs max-w-xs mx-2 ${selfUser ? 'order-1 items-end' : 'order-2 items-start'}`}>
+                  <div className={`flex items-end ${recepientUser && 'justify-end'}`}>
+                    <div className={`flex flex-col space-y-2 text-xs max-w-xs mx-2 ${recepientUser ? 'order-1 items-end' : 'order-2 items-start'}`}>
                       <div>
-                        <span className={`px-4 py-2 rounded-lg inline-block ${selfUser ? "rounded-br-none bg-blue-600 text-white" : "rounded-bl-none bg-gray-300 text-gray-600"}`}>
+                        <span className={`px-4 py-2 rounded-lg inline-block ${recepientUser ? "rounded-br-none bg-blue-600 text-white" : "rounded-bl-none bg-gray-300 text-gray-600"}`}>
                           {data.message}
                         </span>
                       </div>
                     </div>
-                    <img src={data.profile} alt="My profile" className={`w-6 h-6 rounded-full ${selfUser ? "order-2" : "order-1"}`} />
+                    <img src={data.profile} alt="My profile" className={`w-6 h-6 rounded-full ${recepientUser ? "order-2" : "order-1"}`} />
                   </div>
                 </div>
               )
@@ -112,6 +131,11 @@ export const ChatX = ({ show = false,onHide, onShow, self ,user, messages = [], 
           <div ref={messagesEndRef} />
         </div>
         <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0">
+          {
+            isTyping && <svg className="-mt-10 absolute animate-bounce w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+            </svg>
+          }
           <div className="relative flex">
             {
               isAudioRecord && (<span className="absolute inset-y-0 flex items-center">
@@ -122,7 +146,7 @@ export const ChatX = ({ show = false,onHide, onShow, self ,user, messages = [], 
                 </button>
               </span>)
             }
-            <input disabled={!user.connected} value={message} onKeyDown={(e: any) => { if (e.key === 'Enter') handleSend() }} onChange={(e) => handleChange(e.target.value)} type="text" placeholder="Write Something" className="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-full py-3" />
+            <input disabled={inputDisabled} value={message} onKeyDown={(e: any) => { if (e.key === 'Enter') handleSend() }} onChange={(e) => handleChange(e.target.value)} type="text" placeholder="Write Something" className="w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-12 bg-gray-200 rounded-full py-3" />
             <div className="absolute right-0 items-center inset-y-0 hidden sm:flex">
               {isAttachment && (<button type="button" className="inline-flex items-center justify-center rounded-full h-10 w-10 transition duration-500 ease-in-out text-gray-500 hover:bg-gray-300 focus:outline-none">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6 text-gray-600">

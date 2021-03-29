@@ -1,6 +1,6 @@
 {
-  "short_name": "test",
-  "name": "test",
+  "short_name": "reactjs-chat-component",
+  "name": "reactjs-chat-component",
   "icons": [
     {
       "src": "favicon.ico",

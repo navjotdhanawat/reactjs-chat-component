@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import socketIOClient from "socket.io-client";
-import { ChatX } from 'test'
-import 'test/dist/index.css'
-const ENDPOINT = "http://localhost:3000";
-const socket = socketIOClient(ENDPOINT);
+import React, { useEffect, useState } from 'react';
+import { ChatX } from 'test';
 
 const App = () => {
+  const [show, setShow] = useState<any>([]);
 
   const [messages, setMessages] = useState<any>([]);
   const [options] = useState<any>({
@@ -15,8 +12,11 @@ const App = () => {
     isSmiley: false
   });
 
-  let [user, setUser] = useState<any>({});
-  let [self] = useState<any>({
+  let [user] = useState<any>({
+    profile: "https://avatars.githubusercontent.com/u/3865690?s=400&u=2216bc27528edbd01b5226f6731e8f2a080b6f2e&v=4"
+  });
+
+  let [recepient] = useState<any>({
     id: "5f9f797f9a1ab6bc7f81ebdf",
     displayName: "Navjot",
     online: false,
@@ -27,69 +27,66 @@ const App = () => {
   const handleMessage = (message: string) => {
     let data = {
       id: new Date().getTime().toString(),
-      from: self.id,
-      to: user.id,
+      to: recepient.id,
+      from: user.id,
       message: message,
-      displayName: self.displayName,
-      profile: "https://avatars.githubusercontent.com/u/3865690?s=400&u=2216bc27528edbd01b5226f6731e8f2a080b6f2e&v=4",
+      displayName: recepient.displayName,
+      profile: user.profile,
       timestamp: "13:35"
     }
-    setMessages([...messages, data])
-
-    console.log('Message emit: ', { to: user.id, message })
-
-    socket.emit("message", data)
+    setMessages([...messages, data]);
   }
-
-  const acceptChat = (connectedUser: any) => {
-    setUser({ ...user, ...connectedUser, connected: true })
-    socket.emit("chat_accepted", connectedUser);
-    console.log("chat_accepted for user: ", connectedUser)
-  }
-
+  
   useEffect(() => {
-    socket.on('connect', function () {
-      console.log("data===> ", JSON.parse(localStorage.getItem('user') || ""));
-      socket.emit('storeClientInfo', JSON.parse(localStorage.getItem('user') || ""));
-      socket.emit('create', 'agent');
-    });
-    socket.on("message", (data: any) => {
-      console.log('Chat==>', data)
-      let payload = {
-        id: new Date().getTime().toString(),
-        from: data.from,
-        to: data.to,
-        message: data.message,
-        displayName: data.displayName,
-        profile: "https://i.pinimg.com/originals/be/ac/96/beac96b8e13d2198fd4bb1d5ef56cdcf.jpg",
-        timestamp: "13:35"
-      }
-      setMessages((messages: any) => {
-        return [...messages, payload]
-      });
-    });
+    let flag = Math.round(Math.random())
+    let data = {
+      id: new Date().getTime().toString(),
+      from: flag ? recepient.id : user.id,
+      to: flag ? user.id : recepient.id,
+      message: Math.random(),
+      displayName: recepient.displayName,
+      profile: flag ? recepient.profile : user.profile,
+      timestamp: "13:35"
+    }
+    
+    let interval = setInterval(() => {
+      setMessages([...messages, data]);
+    }, 1000);
 
-    socket.on("support", (user: any) => {
-      //todo: show ui popup to accept or reject chat requet
-      console.log('support', user);
-      acceptChat(user);
-    });
-    socket.on("status", (statusData: any) => {
-      //todo: show ui popup to accept or reject chat requet
-      debugger
-      console.log('statusData', statusData);
-      user.online = statusData.Status;
-      setUser(user);
-    });
-  }, []);
+    return () => {
+      clearInterval(interval)
+    };
+  }, [messages]);
 
+  const onHide = () => {
+    setShow(false)
+  }
+  const onShow = () => {
+    setShow(true)
+  }
+
+  const style: any = {
+    zIndex: '111',
+    bottom: '0',
+    fontSize: '12px',
+    right: '24px',
+    position: 'fixed',
+    width: '360px',
+    height: '500px',
+    background: '#ffffff'
+  }
 
   return <ChatX
+    isTyping={true}
     options={options}
     user={user}
-    self={self}
+    recepient={recepient}
+    show={show}
+    onHide={onHide}
+    onShow={onShow}
     messages={messages}
     onSend={handleMessage}
+    style={style}
   />
 }
 

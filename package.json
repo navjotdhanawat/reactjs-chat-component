@@ -1,6 +1,6 @@
 {
   "name": "reactjs-chat-component",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Made with create-react-library",
   "author": "navjotdhanawat",
   "license": "MIT",
@@ -12,17 +12,15 @@
     "node": ">=10"
   },
   "scripts": {
-    "build:css": "postcss src/tailwind.css -o src/index.module.css",
-    "watch": "watch 'npm run build:css' ./src",
-    "build": "NODE_ENV=production microbundle-crl --no-compress --css-modules false --format modern,cjs",
-    "start": "microbundle-crl watch --css-modules false --no-compress --format modern,cjs",
+    "build": "microbundle-crl --no-compress --format modern,cjs",
+    "start": "microbundle-crl watch --no-compress --format modern,cjs",
     "prepare": "run-s build",
     "test": "run-s test:unit test:lint test:build",
     "test:build": "run-s build",
     "test:lint": "eslint .",
     "test:unit": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
-    "predeploy": "cd example && npm install && npm run build",
+    "predeploy": "cd example && {{manager}} install && {{manager}} run build",
     "deploy": "gh-pages -d example/build"
   },
   "peerDependencies": {
